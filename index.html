@@ -1,1 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Prático: Como Consultar Médicos Fora do Seu Estado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Cores da Marca */
+        :root {
+            --unimed-green: #00995D;
+            --unimed-light-green: #C4D600;
+            --unimed-dark: #004d2e;
+        }
+        
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; color: #333; }
+        .text-unimed { color: var(--unimed-green); }
+        .bg-unimed { background-color: var(--unimed-green); }
+        .bg-unimed-light { background-color: var(--unimed-light-green); }
+        .border-unimed { border-color: var(--unimed-green); }
 
+        /* Animações Didáticas */
+        .pulse-pointer {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(0, 153, 93, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(0, 153, 93, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(0, 153, 93, 0); }
+        }
+
+        .highlight-box {
+            border: 2px dashed #EF4444;
+            background-color: rgba(239, 68, 68, 0.05);
+            position: relative;
+        }
+
+        /* Dicas interativas (Tooltips) */
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 50;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.875rem;
+            font-weight: normal;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* ========================================================
+           SOLUÇÃO EXPERT DE IMPRESSÃO - EXATAMENTE 3 PÁGINAS A4
+           ======================================================== */
+        @media print {
+            @page { 
+                size: A4 portrait; 
+                margin: 10mm; /* Margens perfeitas de 1cm */
+            }
+            body { 
+                background-color: #fff !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .no-print { display: none !important; }
+            .tooltip .tooltip-text { display: none !important; } 
+            
+            /* Remoção de sombras para PDF limpo */
+            .shadow-lg, .shadow-md, .shadow-xl, .shadow-sm { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+            .pulse-pointer { animation: none !important; border: 2px solid var(--unimed-green) !important; }
+            
+            main { padding: 0 !important; max-width: 100% !important; margin: 0 auto !important; }
+
+            /* DIVISÃO EXATA DAS PÁGINAS (Sem cortes forçados) */
+            .print-page {
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .print-page:last-child {
+                page-break-after: auto !important;
+            }
+
+            /* FORÇAR COLUNAS LADO A LADO E GARANTIR ALTURA IGUAL NAS CAIXAS */
+            .print-grid-3 { 
+                display: flex !important; 
+                flex-direction: row !important; 
+                flex-wrap: nowrap !important; 
+                gap: 15px !important; 
+                align-items: stretch !important; /* <-- ISTO FAZ AS CAIXAS TEREM A MESMA ALTURA */
+            }
+            .print-grid-3 > div { flex: 1 1 0 !important; width: 33.33% !important; min-width: 0 !important; height: auto !important; }
+
+            .print-grid-2 { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 15px !important; }
+            .print-grid-2 > div { flex: 1 1 50% !important; width: 50% !important; min-width: 0 !important; }
+
+            .print-flex-row { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; }
+            .max-w-\[320px\] { max-width: 100% !important; width: 100% !important; }
+            .lg\:block { display: block !important; }
+
+            /* Correção Cirúrgica para os cabeçalhos das 3 caixinhas na Pág 2 */
+            .print-urgencia-title { font-size: 11pt !important; letter-spacing: -0.2px !important; white-space: nowrap !important; }
+            
+            /* O distintivo de "Atenção ao seu plano" menor e forçado numa linha só no PDF */
+            .print-atencao-badge { 
+                font-size: 6.5pt !important; 
+                padding: 2px 6px !important; 
+                margin-bottom: 5px !important; 
+                letter-spacing: normal !important;
+                white-space: nowrap !important;
+            }
+            .print-atencao-badge i {
+                font-size: 6.5pt !important;
+                margin-right: 3px !important;
+            }
+
+            /* ===================================================
+               ESCALAS ESPECÍFICAS PARA PREENCHIMENTO PERFEITO 
+               =================================================== */
+            
+            /* --- PÁGINA 1: Redução mínima, fonte majestosa --- */
+            #page1 { zoom: 0.90; padding-bottom: 10px; } 
+            #page1 header h1 { font-size: 24pt !important; margin-bottom: 12px !important; }
+            #page1 header p { font-size: 14pt !important; margin-bottom: 15px !important; }
+            #page1 .bg-blue-50 { padding: 20px !important; margin-bottom: 25px !important; margin-top: 15px !important; }
+            #page1 .bg-blue-50 h3 { font-size: 15pt !important; margin-bottom: 10px !important; }
+            #page1 .bg-blue-50 li { font-size: 13pt !important; margin-bottom: 8px !important; }
+            #page1 h2.text-2xl { font-size: 18pt !important; margin-bottom: 15px !important; }
+            
+            #page1 .p-4 { padding: 8px !important; }
+            #page1 .pb-8 { padding-bottom: 10px !important; }
+            #page1 .bg-gray-100 { border-width: 2px !important; }
+            
+            #page1 .mt-10.bg-green-50 { margin-top: 25px !important; padding: 20px !important; }
+            #page1 .mt-10.bg-green-50 h4 { font-size: 15pt !important; margin-bottom: 5px !important; }
+            #page1 .mt-10.bg-green-50 p { font-size: 13pt !important; line-height: 1.4 !important; }
+
+            /* --- PÁGINA 2: O formulário gigante cabe inteiro! --- */
+            #page2 { zoom: 0.75; padding-top: 5px !important; } /* Escala afinada para não cortar o rodapé */
+            #page2 h2.text-2xl { font-size: 17pt !important; margin-bottom: 8px !important; }
+            #page2 .bg-white.p-8 { padding: 15px !important; margin-bottom: 15px !important; }
+            #page2 .bg-white.p-8 p { font-size: 12pt !important; margin-bottom: 0 !important;}
+            #page2 .bg-white.p-8 a { font-size: 13pt !important; }
+            #page2 p.text-lg { font-size: 12.5pt !important; margin-bottom: 10px !important; line-height: 1.3 !important; }
+            #page2 h3.text-xl { font-size: 15pt !important; margin-bottom: 10px !important; }
+            
+            /* As 3 Caixas de Filtro */
+            #page2 .print-grid-3 .bg-white { padding: 12px 15px !important; }
+            #page2 .print-grid-3 p { font-size: 10pt !important; line-height: 1.3 !important; margin-bottom: 2px !important; margin-top: 4px !important; }
+            #page2 .print-grid-3 .font-bold { font-size: 11pt !important; } 
+            
+            /* Dica de Ouro */
+            #page2 .my-8.bg-yellow-50 { padding: 15px !important; margin-top: 15px !important; margin-bottom: 15px !important; border-left-width: 5px !important; }
+            #page2 .my-8.bg-yellow-50 h4 { font-size: 14pt !important; margin-bottom: 5px !important; }
+            #page2 .my-8.bg-yellow-50 p { font-size: 11.5pt !important; line-height: 1.3 !important; }
+            
+            /* Formulário Gigante - Encurtar margens verticais para salvar espaço */
+            #page2 .bg-white.shadow-xl { margin-bottom: 0 !important; border: 1px solid #ddd !important; }
+            #page2 .bg-white.shadow-xl .p-6 { padding: 12px 15px !important; }
+            #page2 .bg-white.shadow-xl .text-lg { font-size: 11pt !important; }
+            #page2 .bg-white.shadow-xl .p-3, #page2 .bg-white.shadow-xl .p-4 { padding: 6px 12px !important; }
+            #page2 .bg-white.shadow-xl .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 8px !important; }
+            #page2 .bg-white.shadow-xl .bg-gray-50.p-6 { padding: 10px 15px !important; }
+
+            /* --- PÁGINA 3: CHECKLIST --- */
+            #page3 { zoom: 0.75; padding: 20px !important; } 
+            #page3 h3 { font-size: 20pt !important; margin-bottom: 35px !important; }
+            #page3 ul.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 30px !important; }
+            #page3 li { margin-bottom: 30px !important; align-items: flex-start !important; }
+            #page3 li div { font-size: 15pt !important; line-height: 1.5 !important; }
+            #page3 li i { font-size: 20pt !important; margin-top: 4px !important; }
+            #page3 footer { margin-top: 50px !important; padding-top: 20px !important; border-top: 1px solid #ccc !important; }
+            #page3 footer p { font-size: 11pt !important; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- NAVBAR HEADER -->
+    <nav class="bg-white shadow-md p-4 sticky top-0 z-50 no-print flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-book-medical text-2xl text-unimed"></i>
+            <span class="font-bold text-lg text-gray-800">Guia de Apoio ao Beneficiário</span>
+        </div>
+        <button onclick="window.print()" class="bg-unimed text-white px-4 py-2 rounded shadow hover:bg-green-700 transition flex items-center gap-2 font-semibold">
+            <i class="fas fa-file-pdf"></i> Salvar como PDF
+        </button>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
+        
+        <!-- ============================================== -->
+        <!-- PÁGINA 1: APLICATIVO                           -->
+        <!-- ============================================== -->
+        <div id="page1" class="print-page">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-unimed mb-4">Como Consultar a Rede Médica Fora de Minas Gerais</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+                    <strong>Passo a passo detalhado para você encontrar médicos, clínicas e hospitais na rede credenciada nacional usando o seu celular ou computador.</strong>
+                </p>
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg text-left max-w-4xl mx-auto shadow-sm">
+                    <h3 class="text-lg font-bold text-blue-800 mb-3"><i class="fas fa-info-circle mr-2"></i> Atenção à sua cobertura fora de Minas Gerais:</h3>
+                    <ul class="list-disc pl-6 text-gray-700 space-y-3">
+                        <li><strong>Plano Estadual:</strong> Oferece atendimento eletivo apenas em Minas Gerais. Fora do estado, a cobertura é <strong>exclusiva para Urgência e Emergência</strong>.</li>
+                        <li><strong>Plano Nacional:</strong> Oferece atendimento eletivo (consultas e exames normais), além de urgência e emergência, em <strong>todo o território nacional</strong>.</li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- ESCOLHA (Apenas Visível no Site, some no PDF) -->
+            <section class="mb-12 no-print">
+                <h2 class="text-2xl font-bold border-b-2 border-unimed pb-2 mb-6 text-gray-800">Escolha por onde quer começar:</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <a href="#via-app" class="bg-white p-6 rounded-xl shadow-md border-l-4 border-unimed hover:shadow-lg transition cursor-pointer">
+                        <i class="fas fa-mobile-alt text-4xl text-unimed mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Pelo Aplicativo Unimed</h3>
+                        <p class="text-gray-600">Acesse pelo app instalado no celular, veja como chegar ao Guia Nacional por ele.</p>
+                    </a>
+                    <a href="#via-site" class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-400 hover:shadow-lg transition cursor-pointer">
+                        <i class="fas fa-laptop text-4xl text-unimed mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Direto pelo Site (Mais rápido)</h3>
+                        <p class="text-gray-600">Acesse diretamente pelo navegador do seu celular ou computador.</p>
+                    </a>
+                </div>
+            </section>
+
+            <section id="via-app" class="mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-unimed text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl">1</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Acessando pelo Aplicativo</h2>
+                </div>
+
+                <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 items-start print-grid-3">
+                    
+                    <!-- Mockup Tela 1 -->
+                    <div>
+                        <p class="font-bold mb-2 text-gray-800"><i class="fas fa-arrow-right text-unimed"></i> Passo A: Na tela inicial do app, clique em <span class="text-unimed">Consultas</span>.</p>
+                        
+                        <div class="w-full max-w-[320px] mx-auto bg-gray-100 border-4 border-gray-800 rounded-3xl shadow-lg relative">
+                            <div class="bg-unimed text-white p-4 flex justify-between items-center rounded-t-[20px] rounded-b-xl">
+                                <i class="fas fa-bars"></i>
+                                <span class="font-semibold">Olá, Beneficiário</span>
+                                <div class="bg-white text-unimed font-bold rounded p-1 text-xs">BT</div>
+                            </div>
+                            <div class="p-4 bg-gray-50 pb-8 rounded-b-[20px]">
+                                <h3 class="font-bold text-gray-800 mb-4">O que você precisa?</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center relative tooltip cursor-pointer">
+                                        <div class="absolute inset-0 border-4 border-green-500 rounded-xl pulse-pointer z-10"></div>
+                                        <i class="fas fa-hand-holding-medical text-3xl text-unimed mb-2"></i>
+                                        <p class="font-semibold text-sm text-gray-800">Consultas</p>
+                                        <span class="tooltip-text">Clique aqui para abrir o menu de busca de rede médica.</span>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center opacity-70">
+                                        <i class="fas fa-file-signature text-3xl text-unimed mb-2"></i>
+                                        <p class="font-semibold text-sm text-gray-800">Autorização</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center opacity-70">
+                                        <i class="fas fa-heartbeat text-3xl text-unimed mb-2"></i>
+                                        <p class="font-semibold text-sm text-gray-800">Minha saúde</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center opacity-70">
+                                        <i class="fas fa-file-medical-alt text-3xl text-unimed mb-2"></i>
+                                        <p class="font-semibold text-sm text-gray-800">Exames</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mockup Tela 2 -->
+                    <div>
+                        <p class="font-bold mb-2 text-gray-800"><i class="fas fa-arrow-right text-unimed"></i> Passo B: Selecione para <strong>quem</strong> é o atendimento.</p>
+                        
+                        <div class="w-full max-w-[320px] mx-auto bg-gray-100 border-4 border-gray-800 rounded-3xl shadow-lg relative">
+                            <div class="bg-white text-gray-800 p-4 flex items-center gap-4 border-b border-gray-200 rounded-t-[20px]">
+                                <i class="fas fa-chevron-left text-unimed"></i>
+                                <span class="font-semibold flex-1 text-center">Escolha um perfil</span>
+                            </div>
+                            <div class="p-4 bg-gray-50 pb-8 space-y-4 rounded-b-[20px]">
+                                <h3 class="font-bold text-gray-800 text-[15px] leading-tight">Você está buscando atendimento para:</h3>
+                                
+                                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 relative tooltip cursor-pointer">
+                                    <div class="absolute inset-0 border-4 border-green-500 rounded-xl pulse-pointer z-10"></div>
+                                    <div class="bg-gray-100 text-gray-600 font-bold rounded p-2 text-sm w-10 h-10 flex items-center justify-center">BT</div>
+                                    <div>
+                                        <p class="font-bold text-sm text-gray-800">Beneficiário Titular</p>
+                                        <p class="text-[11px] text-gray-500">Nome do Plano Exemplo - Titular</p>
+                                        <p class="text-[11px] text-gray-500">0000 0000 0000 0000</p>
+                                    </div>
+                                    <span class="tooltip-text">Selecione o seu perfil ou do seu dependente para prosseguir com a busca.</span>
+                                </div>
+
+                                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 opacity-70 cursor-pointer">
+                                    <div class="bg-gray-100 text-gray-600 font-bold rounded p-2 text-sm w-10 h-10 flex items-center justify-center">DP</div>
+                                    <div>
+                                        <p class="font-bold text-sm text-gray-800">Beneficiário Dependente</p>
+                                        <p class="text-[11px] text-gray-500">Nome do Plano Exemplo - Dependente</p>
+                                        <p class="text-[11px] text-gray-500">0000 0000 0000 0000</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-green-50 p-3 rounded-xl shadow-sm border border-green-200 flex items-start gap-3 mt-2">
+                                    <i class="fas fa-user-plus text-unimed mt-1"></i>
+                                    <div>
+                                        <p class="font-bold text-[13px] text-gray-800">Adicionar cliente Unimed</p>
+                                        <p class="text-[11px] text-gray-600 mt-1 leading-tight">Agende consultas para familiares, amigos e outros conhecidos.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mockup Tela 3 -->
+                    <div>
+                        <p class="font-bold mb-2 text-gray-800"><i class="fas fa-arrow-right text-unimed"></i> Passo C: Role a tela e clique em <span class="text-unimed">Guia Unimed Brasil</span>.</p>
+                        
+                        <div class="w-full max-w-[320px] mx-auto bg-gray-100 border-4 border-gray-800 rounded-3xl shadow-lg relative">
+                            <div class="bg-unimed text-white p-4 flex items-center gap-4 rounded-t-[20px]">
+                                <i class="fas fa-chevron-left"></i>
+                                <span class="font-semibold flex-1 text-center">Consultas</span>
+                            </div>
+                            <div class="p-4 bg-white pb-8 rounded-b-[20px]">
+                                <div class="mb-6 opacity-50">
+                                    <h3 class="font-bold text-gray-800 mb-2">Consultas por especialidade</h3>
+                                    <div class="border border-gray-300 rounded-full p-2 px-4 flex gap-2 items-center text-sm">
+                                        <i class="fas fa-search text-unimed"></i> Digite uma especialidade...
+                                    </div>
+                                    <p class="text-xs text-red-500 mt-1">*Esta busca acima é apenas para seu estado local.</p>
+                                </div>
+
+                                <h3 class="font-bold text-gray-800 mb-4">Mais serviços</h3>
+                                <div class="flex justify-between gap-2 text-center">
+                                    <div class="opacity-70">
+                                        <div class="bg-green-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-1"><i class="fas fa-file-prescription text-unimed"></i></div>
+                                        <p class="text-[10px] font-semibold text-unimed leading-tight">Renovação</p>
+                                    </div>
+                                    <div class="opacity-70">
+                                        <div class="bg-green-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-1"><i class="fas fa-head-side-virus text-unimed"></i></div>
+                                        <p class="text-[10px] font-semibold text-unimed leading-tight">Saúde Mental</p>
+                                    </div>
+                                    <div class="opacity-70">
+                                        <div class="bg-green-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-1"><i class="fas fa-hospital-user text-unimed"></i></div>
+                                        <p class="text-[10px] font-semibold text-unimed leading-tight">Pronto Atend.</p>21:37 22/03/2026
+                                    </div>
+                                    <div class="relative tooltip cursor-pointer">
+                                        <div class="absolute inset-0 border-4 border-green-500 rounded-full w-12 h-12 mx-auto pulse-pointer z-10"></div>
+                                        <div class="bg-green-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-1 border border-unimed"><i class="fas fa-book-medical text-unimed"></i></div>
+                                        <p class="text-[10px] font-bold text-unimed leading-tight">Guia Unimed Brasil</p>
+                                        <span class="tooltip-text">É ESTE BOTÃO que você deve usar quando estiver fora de MG. Ele abre o portal nacional.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div class="mt-10 bg-green-50 border-l-4 border-unimed p-6 rounded-lg flex items-start gap-4 shadow-sm">
+                    <div class="bg-unimed text-white rounded-full w-12 h-12 flex items-center justify-center shrink-0 mt-1 text-xl"><i class="fas fa-external-link-alt"></i></div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-1">O que acontece agora?</h4>
+                        <p class="text-gray-700 text-lg">Ao clicar no ícone "Guia Unimed Brasil", o aplicativo abrirá automaticamente o navegador no seu celular, direcionando-o para o <strong>site oficial Nacional da Unimed</strong>. A partir daqui, o passo a passo é igual para todos.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- PÁGINA 2: SITE / FORMULÁRIO                    -->
+        <!-- ============================================== -->
+        <div id="page2" class="print-page">
+            <section id="via-site" class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-unimed text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl">2</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Acessando pelo Site</h2>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 print-flex-row">
+                    <div class="flex-1">
+                        <p class="text-gray-700 mb-3 text-lg">Caso prefira usar o computador ou navegador do seu celular, você pode saltar a etapa do aplicativo e acessar diretamente o link oficial de busca nacional:</p>
+                        <a href="https://www.unimed.coop.br/site/guia-medico#/" target="_blank" class="text-xl font-bold text-blue-600 hover:underline break-all">
+                            https://www.unimed.coop.br/site/guia-medico
+                        </a>
+                    </div>
+                    <a href="https://www.unimed.coop.br/site/guia-medico#/" target="_blank" class="bg-unimed text-white px-8 py-4 rounded-lg font-bold hover:bg-green-700 transition shadow-md no-print whitespace-nowrap text-lg">
+                        Acessar Site Agora <i class="fas fa-external-link-alt ml-2"></i>
+                    </a>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-unimed-light text-unimed-dark w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl"><i class="fas fa-keyboard"></i></div>
+                    <h2 class="text-2xl font-bold text-gray-800">Preenchendo a Busca Detalhada</h2>
+                </div>
+
+                <p class="text-gray-700 mb-6 text-lg">
+                    Independentemente de ter vindo pelo aplicativo ou pelo link direto, <strong>utilize a aba "Busca Detalhada"</strong> para resultados mais precisos fora do seu estado. Abaixo detalhamos como preencher os filtros.
+                </p>
+
+                <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Entendendo os Filtros Especiais</h3>
+                
+                <div class="grid md:grid-cols-3 gap-6 mb-10 items-stretch print-grid-3">
+                    
+                    <!-- BOX 1: TELESSAÚDE -->
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+                        <div class="flex items-center justify-between w-full mb-3 mt-1 gap-2">
+                            <span class="font-bold text-unimed-dark text-base flex items-center whitespace-nowrap print-urgencia-title">
+                                <i class="far fa-plus-square text-unimed mr-2 shrink-0"></i> Telessaúde
+                            </span>
+                            <div class="w-10 h-5 bg-gray-200 rounded-full relative shrink-0 ml-auto"><div class="w-5 h-5 bg-white rounded-full border border-gray-300 absolute left-0 shadow-sm"></div></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Ative se você quiser fazer a consulta por <strong>videochamada</strong>, sem precisar sair de casa ou do hotel.</p>
+                    </div>
+                    
+                    <!-- BOX 2: "Atenção ao seu Plano" REDESENHADA IGUAL AO PRINT DA REFERÊNCIA -->
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-red-200 flex flex-col h-full">
+                        <div class="flex items-center justify-between w-full mb-3 mt-1 gap-2">
+                            <span class="font-bold text-red-700 text-base flex items-center whitespace-nowrap print-urgencia-title">
+                                <i class="fas fa-ambulance mr-2 shrink-0"></i> Urgência e emergência
+                            </span>
+                            <div class="w-10 h-5 bg-gray-200 rounded-full relative shrink-0 ml-auto"><div class="w-5 h-5 bg-white rounded-full border border-gray-300 absolute left-0 shadow-sm"></div></div>
+                        </div>
+                        <!-- Pílula Rosa Suave com Texto Vermelho (Ajustado para ficar em linha única e pequeno no PDF) -->
+                        <div class="mb-4 text-center flex justify-center">
+                            <span class="text-red-500 bg-red-50 text-[10px] font-bold uppercase tracking-wide inline-flex items-center px-3 py-1 rounded-full print-atencao-badge whitespace-nowrap">
+                                <i class="fas fa-exclamation-triangle mr-1"></i> ATENÇÃO AO SEU PLANO
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-800 space-y-3 flex-1 flex flex-col justify-start">
+                            <p><strong>Plano Estadual:</strong> Caso esteja fora de MG, <strong>ative</strong> esta opção para encontrar atendimento válido.</p>
+                            <p><strong>Plano Nacional:</strong> Ative <em>apenas</em> se for uma real emergência.</p>
+                        </div>
+                    </div>
+
+                    <!-- BOX 3: MUDANÇA DE REDE -->
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+                        <div class="flex items-center justify-between w-full mb-3 mt-1 gap-2">
+                            <span class="font-bold text-unimed-dark text-base flex items-center whitespace-nowrap print-urgencia-title">
+                                <i class="fas fa-exchange-alt text-unimed mr-2 shrink-0"></i> Mudança de rede
+                            </span>
+                            <div class="w-10 h-5 bg-gray-200 rounded-full relative shrink-0 ml-auto"><div class="w-5 h-5 bg-white rounded-full border border-gray-300 absolute left-0 shadow-sm"></div></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Mostra prestadores que entraram recentemente para substituir outros na rede. <em class="text-gray-500">Geralmente não é usado em viagens.</em></p>
+                    </div>
+                </div>
+
+                <div class="my-8 bg-yellow-50 border-l-8 border-yellow-400 p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-gray-800 text-xl mb-3 flex items-center"><i class="fas fa-lightbulb text-yellow-500 mr-3 text-2xl animate-pulse"></i> Dica: Preenchimento Inteligente!</h4>
+                    <p class="text-gray-800 text-lg leading-relaxed">
+                        Veja o exemplo abaixo de como preencher. Note que, <strong>após digitar seu CPF ou número da carteirinha, o sistema já preenche seu plano automaticamente</strong> na parte inferior (em “Ver mais filtros”). Você não precisa se preocupar em procurar o nome do seu plano!
+                    </p>
+                </div>
+
+                <!-- O FORMULÁRIO GIGANTE -->
+                <div class="bg-white shadow-xl rounded-xl border border-gray-200 mb-8 relative">
+                    <div class="flex border-b border-gray-200 bg-gray-100 rounded-t-xl">
+                        <div class="flex-1 py-4 text-center text-gray-400 font-semibold opacity-40 border-t-4 border-transparent cursor-not-allowed rounded-tl-xl text-lg">Busca rápida</div>
+                        <div class="flex-1 py-4 text-center bg-white border-t-4 border-unimed font-bold text-unimed relative rounded-tr-xl text-lg">
+                            Busca detalhada
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-8 grid md:grid-cols-2 gap-x-10 gap-y-6 print-grid-2">
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <div class="border border-green-400 rounded p-3 text-gray-700 bg-white flex justify-between items-center text-lg">
+                                    111.111.111.11 <i class="fas fa-check text-green-500"></i>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">É cliente? Digite seu CPF ou carteirinha <i class="fas fa-question-circle text-gray-400"></i></div>
+                            </div>
+
+                            <div class="relative highlight-box p-4 rounded tooltip mt-2">
+                                <div class="absolute -right-2 -top-3 bg-red-600 text-white text-[11px] font-bold px-3 py-1 rounded shadow-md pointer-events-none">
+                                    Indique a Especialidade
+                                </div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-800 flex justify-between items-center bg-white text-lg">
+                                    Pronto Atendimento <div class="flex gap-2 text-gray-400"><i class="fas fa-times cursor-pointer"></i> <i class="fas fa-chevron-down cursor-pointer"></i></div>
+                                </div>
+                                <span class="tooltip-text">Busque por "Pronto Atendimento" ou "Clínica Médica" caso tenha uma emergência.</span>
+                            </div>
+
+                            <div class="relative tooltip bg-red-50 p-4 rounded border border-red-200">
+                                <label class="block text-sm font-bold text-gray-800 mb-2">Estado<span class="text-red-500">*</span></label>
+                                <div class="border-b border-red-500 pb-2 text-gray-800 flex justify-between items-center bg-white p-2 text-lg">
+                                    São Paulo <div class="flex gap-2 text-gray-400"><i class="fas fa-times cursor-pointer"></i> <i class="fas fa-chevron-down cursor-pointer"></i></div>
+                                </div>
+                                <span class="tooltip-text">Lembre-se: Coloque o estado onde você está viajando/morando agora, e NÃO o de origem.</span>
+                            </div>
+                            
+                            <div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-400 flex justify-between items-center text-lg">
+                                    Bairro <i class="fas fa-chevron-down text-sm"></i>
+                                </div>
+                            </div>
+
+                            <div class="relative tooltip bg-blue-50 p-4 rounded border border-blue-200">
+                                <div class="border-b border-gray-300 pb-2 text-gray-600 flex justify-between items-center bg-gray-100 px-2 text-lg">
+                                    ES05 <i class="fas fa-chevron-down text-sm"></i>
+                                </div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-600 flex justify-between items-center bg-gray-100 px-2 mt-4 text-lg">
+                                    UNIMED BELO HORIZONTE <i class="fas fa-chevron-down text-sm"></i>
+                                </div>
+                                <span class="tooltip-text">Preenchido automaticamente pelo sistema ao inserir o CPF ou o número da sua carteirinha!</span>
+                                <div class="absolute -left-4 top-10 text-blue-500 text-2xl"><i class="fas fa-level-up-alt transform rotate-90"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex justify-end flex-col items-end space-y-4 opacity-60 mt-2">
+                                <div class="flex items-center gap-3 text-sm text-gray-600">Telessaúde <div class="w-10 h-5 bg-gray-300 rounded-full"></div></div>
+                                <div class="flex items-center gap-3 text-sm text-gray-600">Urgência e emergência <div class="w-10 h-5 bg-gray-300 rounded-full"></div></div>
+                                <div class="flex items-center gap-3 text-sm text-gray-600">Mudança da rede prestadora <div class="w-10 h-5 bg-gray-300 rounded-full"></div></div>
+                            </div>
+
+                            <div class="mt-10">
+                                <div class="border-b border-gray-300 pb-2 text-gray-400 text-lg">Nome do médico ou prestador</div>
+                            </div>
+
+                            <div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-800 flex justify-between items-center text-lg">
+                                    Taubaté <div class="flex gap-2 text-gray-400"><i class="fas fa-times cursor-pointer"></i> <i class="fas fa-chevron-down cursor-pointer"></i></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-800 flex justify-between items-center text-lg">
+                                    Médico <div class="flex gap-2 text-gray-400"><i class="fas fa-times cursor-pointer"></i> <i class="fas fa-chevron-down cursor-pointer"></i></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 p-4 rounded border border-blue-200 tooltip mt-6">
+                                <div class="border-b border-gray-300 pb-2 text-gray-600 flex justify-between items-center bg-gray-100 px-2 truncate text-lg">
+                                    (459585098) - UNIPART FLEX ES... <i class="fas fa-chevron-down text-sm"></i>
+                                </div>
+                                <div class="border-b border-gray-300 pb-2 text-gray-800 flex justify-between items-center mt-4 text-lg">
+                                    Qualidade Monitorada <div class="flex gap-2 text-gray-400"><i class="fas fa-times cursor-pointer"></i> <i class="fas fa-chevron-down cursor-pointer"></i></div>
+                                </div>
+                                <span class="tooltip-text">Aqui está a prova! O sistema identificou que você tem o plano Unipart Flex. Ele só vai mostrar médicos que atendam esse plano.</span>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-6 border-t border-gray-200 flex items-center justify-between rounded-b-xl">
+                        <div class="flex items-center gap-4">
+                            <button class="bg-unimed-light text-unimed-dark font-bold px-10 py-4 rounded hover:bg-opacity-80 transition relative tooltip text-lg">
+                                Pesquisar
+                            </button>
+                            <span class="text-gray-500 underline cursor-pointer hover:text-gray-800 text-lg">Limpar dados</span>
+                        </div>
+                        <div class="font-bold text-gray-500 flex items-center gap-2 cursor-pointer text-lg">
+                            Ver menos filtros <div class="bg-unimed-light text-white w-8 h-8 rounded-full flex items-center justify-center"><i class="fas fa-chevron-up"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- PÁGINA 3: CHECKLIST                            -->
+        <!-- ============================================== -->
+        <div id="page3" class="print-page">
+            <section class="bg-white p-8 rounded-xl shadow-md border-t-4 border-unimed">
+                <h3 class="text-2xl font-bold text-gray-800 mb-8"><i class="fas fa-clipboard-check text-unimed mr-2"></i> Resumo do Passo a Passo (Checklist)</h3>
+                <ul class="space-y-6">
+                    <li class="flex items-start gap-4">
+                        <i class="fas fa-check-circle text-green-500 mt-1 text-xl"></i>
+                        <div class="text-lg">
+                            <strong>Aba de Busca:</strong> Selecione a aba <span class="text-unimed font-bold">Busca Detalhada</span>.
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i class="fas fa-check-circle text-green-500 mt-1 text-xl"></i>
+                        <div class="text-lg">
+                            <strong>Identificação:</strong> Preencha o <strong>CPF</strong> ou <strong>Carteirinha</strong>. O sistema irá identificar o seu plano automaticamente.
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i class="fas fa-check-circle text-green-500 mt-1 text-xl"></i>
+                        <div class="text-lg">
+                            <strong>Estado e Cidade (Obrigatório):</strong> Selecione o estado e a cidade <strong>onde você deseja ser atendido</strong> (seu destino de viagem), e não o seu estado de residência.
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i class="fas fa-check-circle text-green-500 mt-1 text-xl"></i>
+                        <div class="text-lg">
+                            <strong>Atenção à abrangencia do seu Plano:</strong>
+                            <ul class="list-disc pl-5 mt-2 space-y-2 text-gray-700">
+                                <li>Se você tem o <strong>Plano Estadual</strong> e está fora de MG, ative a chave <em>"Urgência e emergência"</em>.</li>
+                                <li>Se você tem o <strong>Plano Nacional</strong>, não precisa ativar a chave (a menos que seja uma emergência real), podendo agendar consultas eletivas normais.</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i class="fas fa-check-circle text-green-500 mt-1 text-xl"></i>
+                        <div class="text-lg">
+                            <strong>Consulte em Tempo Real:</strong> Faça a pesquisa no momento em que precisar de atendimento para acesso à rede de prestadores atualizada.
+                        </div>
+                    </li>
+                </ul>
+            </section>
+            
+            <footer class="mt-12 text-center text-gray-500 pt-6 border-t border-gray-200">
+                <p class="text-lg">Em caso de dúvidas ou não localização de prestadores, entre em contato com o 0800 no verso da sua carteirinha digital.</p>
+            </footer>
+        </div>
+
+    </main>
+
+</body>
+</html>
